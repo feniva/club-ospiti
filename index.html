@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Club Ospiti</title>
+<style>
+:root{--bg:#171310;--card:#221c17;--gold:#c9a35c;--gold-soft:#e8d5ae;--ink:#f2ece2;--dim:#b3a892;--danger:#d9776b}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.55}
+.wrap{max-width:430px;margin:0 auto;padding:18px 20px 40px}
+.langbar{text-align:right;margin-bottom:4px}
+.langbar button{background:none;border:1px solid transparent;border-radius:9px;font-size:22px;padding:3px 7px;cursor:pointer;opacity:.45}
+.langbar button.on{opacity:1;border-color:var(--gold);background:rgba(201,163,92,.1)}
+header{text-align:center;margin-bottom:18px}
+.mark{width:54px;height:54px;border:1.5px solid var(--gold);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-family:Georgia,serif;font-size:24px;color:var(--gold);margin-bottom:10px}
+h1{font-family:Georgia,serif;font-weight:400;font-size:24px}
+.tag{color:var(--dim);font-size:12px;letter-spacing:2.5px;text-transform:uppercase;margin-top:3px}
+h2{font-family:Georgia,serif;font-weight:400;font-size:21px;text-align:center;margin:14px 0 6px}
+.sub{color:var(--dim);font-size:14px;text-align:center;margin-bottom:16px}
+.gift{margin:0 auto 18px;padding:12px 16px;border:1px dashed var(--gold);border-radius:16px;background:rgba(201,163,92,.07);max-width:330px;text-align:center;font-size:14px}
+.gift strong{color:var(--gold-soft)}
+.field{margin-bottom:13px}
+label{display:block;font-size:13px;color:var(--dim);margin-bottom:5px}
+.req{color:var(--gold)}
+input{width:100%;padding:13px 14px;border-radius:12px;border:1px solid #3b322a;background:var(--card);color:var(--ink);font-size:16px;outline:none}
+input:focus{border-color:var(--gold)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hint{font-size:11.5px;color:#8a8071;margin-top:4px}
+.consent{display:flex;gap:11px;align-items:flex-start;background:var(--card);border:1px solid #3b322a;border-radius:12px;padding:12px;margin-bottom:10px}
+.consent input{width:17px;height:17px;flex:none;margin-top:3px;accent-color:var(--gold)}
+.consent span{font-size:12.5px;color:var(--dim)}
+.btn{display:block;width:100%;padding:16px;border:none;border-radius:14px;background:var(--gold);color:#221a0e;font-size:16.5px;font-weight:600;cursor:pointer;margin-top:20px}
+.btn:disabled{opacity:.55}
+.err{color:var(--danger);font-size:13px;text-align:center;margin-top:10px;display:none}
+#done{display:none;text-align:center}
+.voucher{margin:20px 0 8px;border-radius:18px;border:1px solid var(--gold);background:linear-gradient(160deg,#2b2318,#1d1712);overflow:hidden}
+.vt{padding:20px 18px 14px;border-bottom:1px dashed #55462c}
+.vt small{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--dim)}
+.vt h3{font-family:Georgia,serif;font-weight:400;font-size:22px;color:var(--gold-soft);margin-top:5px}
+.vb{padding:14px 18px 18px}
+.code{font-family:Menlo,Consolas,monospace;font-size:21px;letter-spacing:3px;color:var(--gold);background:rgba(201,163,92,.1);border-radius:10px;padding:9px 13px;display:inline-block;margin:5px 0 7px}
+.meta{font-size:12.5px;color:var(--dim)}
+.stars{font-size:26px;letter-spacing:5px;color:var(--gold);margin-top:18px}
+.gbtn{display:block;padding:15px;border-radius:14px;background:#fff;color:#1a1a1a;font-size:15.5px;font-weight:600;text-decoration:none;margin-top:14px}
+footer{margin-top:30px;text-align:center;font-size:11px;color:#6d6455}
+#loading{text-align:center;padding:60px 0;color:var(--dim)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="langbar">
+<button type="button" id="lang-it" onclick="setLang('it')">🇮🇹</button>
+<button type="button" id="lang-en" onclick="setLang('en')">🇬🇧</button>
+</div>
+
+<header>
+<div class="mark" id="h-mark">·</div>
+<h1 id="h-nome">…</h1>
+<div class="tag" data-i18n="tag">Club Ospiti</div>
+</header>
+
+<div id="loading">…</div>
+
+<div id="formview" style="display:none">
+<h2 data-i18n="welcome">Grazie per essere stati nostri ospiti</h2>
+<p class="sub" data-i18n="sub">Entra nel Club: auguri, sorprese e vantaggi riservati.</p>
+<div class="gift" data-i18n-html="gift">🎁 Iscrivendoti ricevi subito il <strong>Buono Dolce per la prossima cena</strong></div>
+
+<form id="frm">
+<div class="row2">
+<div class="field"><label><span data-i18n="lNome">Nome</span> <span class="req">*</span></label><input type="text" id="nome" required></div>
+<div class="field"><label data-i18n="lCognome">Cognome</label><input type="text" id="cognome"></div>
+</div>
+<div class="field"><label><span data-i18n="lTel">Cellulare (WhatsApp)</span> <span class="req">*</span></label><input type="tel" id="telefono" placeholder="+39 333 1234567" required></div>
+<div class="field"><label>Email</label><input type="email" id="email"></div>
+<div class="field"><label><span data-i18n="lComp">Data di nascita</span> <span class="req">*</span></label><input type="date" id="compleanno" required><div class="hint" data-i18n="hintComp">Riservato ai maggiorenni (18+).</div></div>
+<div class="field"><label data-i18n="lAnn">Anniversario (facoltativo)</label><input type="date" id="anniversario"><div class="hint" data-i18n="hintAnn">Per proporvi la cena romantica al momento giusto.</div></div>
+
+<label class="consent"><input type="checkbox" id="presaVisione" required>
+<span><span data-i18n="c1">Ho letto l'informativa privacy (art. 13 Reg. UE 2016/679) esposta al tavolo e disponibile in sala.</span> <span class="req">*</span></span></label>
+<label class="consent"><input type="checkbox" id="consensoMarketing" required>
+<span><span data-i18n="c2">Acconsento a ricevere auguri, buoni e proposte via WhatsApp/email (art. 6.1.a GDPR; art. 130 D.Lgs. 196/2003). Necessario per aderire al Club.</span> <span class="req">*</span></span></label>
+<label class="consent"><input type="checkbox" id="consensoProfilazione">
+<span data-i18n="c3">Acconsento alla personalizzazione delle proposte in base alle mie ricorrenze e preferenze (facoltativo).</span></label>
+
+<div class="err" id="err"></div>
+<button class="btn" id="sbtn" type="submit" data-i18n="btn">Ricevi il tuo buono 🎁</button>
+</form>
+</div>
+
+<div id="done">
+<h2 style="margin-top:4px" data-i18n="doneTitle">Benvenuto nel Club! 🎉</h2>
+<p class="sub" data-i18n="doneSub">Ecco il tuo regalo. Mostralo alla prossima visita.</p>
+<div class="voucher">
+<div class="vt"><small data-i18n="vLabel">Buono di benvenuto</small><h3 data-i18n="vName">Buono Dolce · prossima cena</h3></div>
+<div class="vb"><div class="code" id="vcode">—</div><div class="meta" id="vmeta"></div></div>
+</div>
+<div class="stars">★★★★★</div>
+<p class="sub" style="margin:4px 0 0" data-i18n="revSub">Ti è piaciuta la serata? Una recensione ci aiuta tantissimo.</p>
+<a class="gbtn" id="g-review" href="#" target="_blank" rel="noopener" data-i18n="gbtn">Lascia una recensione su Google</a>
+</div>
+
+<footer id="h-footer"></footer>
+</div>
+
+<script src="config.js"></script>
+<script>
+var T = {
+it: {
+tag:'Club Ospiti', welcome:'Grazie per essere stati nostri ospiti',
+sub:'Entra nel Club: auguri, sorprese e vantaggi riservati.',
+gift:'🎁 Iscrivendoti ricevi subito il <strong>Buono Dolce per la prossima cena</strong>',
+lNome:'Nome', lCognome:'Cognome', lTel:'Cellulare (WhatsApp)',
+lComp:'Data di nascita', lAnn:'Anniversario (facoltativo)',
+hintComp:'Riservato ai maggiorenni (18+).',
+hintAnn:'Per proporvi la cena romantica al momento giusto.',
+c1:"Ho letto l'informativa privacy (art. 13 Reg. UE 2016/679) esposta al tavolo e disponibile in sala.",
+c2:'Acconsento a ricevere auguri, buoni e proposte via WhatsApp/email (art. 6.1.a GDPR; art. 130 D.Lgs. 196/2003). Necessario per aderire al Club.',
+c3:'Acconsento alla personalizzazione delle proposte in base alle mie ricorrenze e preferenze (facoltativo).',
+btn:'Ricevi il tuo buono 🎁', wait:'Un attimo…',
+errEta:'Per iscriverti devi avere tra 18 e 98 anni.',
+errDup:'Questo numero è già iscritto al Club. Grazie!',
+errDati:'Compila i campi e i consensi obbligatori.',
+errConn:'Connessione non riuscita, riprova.', errGen:'Errore imprevisto, riprova.',
+doneTitle:'Benvenuto nel Club! 🎉', doneSub:'Ecco il tuo regalo. Mostralo alla prossima visita.',
+vLabel:'Buono di benvenuto', vName:'Buono Dolce · prossima cena',
+vMeta:'Valido {gg} giorni · da mostrare in sala',
+vMetaMail:'Valido {gg} giorni · inviato anche via email con il QR',
+revSub:'Ti è piaciuta la serata? Una recensione ci aiuta tantissimo.',
+gbtn:'Lascia una recensione su Google'
+},
+en: {
+tag:'Guests Club', welcome:'Thank you for dining with us',
+sub:'Join our Club: wishes, surprises and member perks.',
+gift:'🎁 Join now and instantly get a <strong>Dessert Voucher for your next dinner</strong>',
+lNome:'First name', lCognome:'Last name', lTel:'Mobile (WhatsApp)',
+lComp:'Date of birth', lAnn:'Anniversary (optional)',
+hintComp:'Adults only (18+).',
+hintAnn:'So we can suggest your romantic dinner at the right time.',
+c1:'I have read the privacy notice (art. 13 EU Reg. 2016/679) available at the table and in the restaurant.',
+c2:'I consent to receiving greetings, vouchers and offers via WhatsApp/email (art. 6.1.a GDPR; art. 130 Italian Privacy Code). Required to join the Club.',
+c3:'I consent to personalised offers based on my special dates and preferences (optional).',
+btn:'Get your voucher 🎁', wait:'One moment…',
+errEta:'You must be between 18 and 98 years old to join.',
+errDup:'This number is already a Club member. Thank you!',
+errDati:'Please fill the required fields and consents.',
+errConn:'Connection failed, please retry.', errGen:'Unexpected error, please try again.',
+doneTitle:'Welcome to the Club! 🎉', doneSub:'Here is your welcome gift. Show it on your next visit.',
+vLabel:'Welcome voucher', vName:'Dessert Voucher · next dinner',
+vMeta:'Valid {gg} days · show it to our staff',
+vMetaMail:'Valid {gg} days · also sent to your email with a QR code',
+revSub:'Enjoyed your evening? A review helps us enormously.',
+gbtn:'Leave a review on Google'
+}
+};
+
+var slug = new URLSearchParams(location.search).get('r') || CLUB.DEFAULT_SLUG;
+var risto = null;
+var lang = (navigator.language||'it').toLowerCase().indexOf('it')===0 ? 'it' : 'en';
+
+function api(path, opts){
+opts = opts || {};
+opts.headers = Object.assign({'Content-Type':'application/json','Authorization':'Bearer '+CLUB.SUPABASE_ANON_KEY,'apikey':CLUB.SUPABASE_ANON_KEY}, opts.headers||{});
+return fetch(CLUB.SUPABASE_URL + '/functions/v1/' + path, opts).then(function(r){ return r.json(); });
+}
+
+function setLang(l){
+lang = l; document.documentElement.lang = l;
+var d = T[l];
+document.querySelectorAll('[data-i18n]').forEach(function(el){ if(d[el.dataset.i18n]) el.textContent = d[el.dataset.i18n]; });
+document.querySelectorAll('[data-i18n-html]').forEach(function(el){ if(d[el.dataset.i18nHtml]) el.innerHTML = d[el.dataset.i18nHtml]; });
+document.getElementById('lang-it').classList.toggle('on', l==='it');
+document.getElementById('lang-en').classList.toggle('on', l==='en');
+}
+
+(function(){ // limiti età 18–98 sul date picker
+var o = new Date();
+function iso(d){ return d.toISOString().slice(0,10); }
+document.getElementById('compleanno').max = iso(new Date(o.getFullYear()-18,o.getMonth(),o.getDate()));
+document.getElementById('compleanno').min = iso(new Date(o.getFullYear()-98,o.getMonth(),o.getDate()));
+})();
+
+function etaDa(iso){
+if(!iso) return null;
+var p = iso.split('-'), n = new Date(+p[0],+p[1]-1,+p[2]), o = new Date();
+var e = o.getFullYear()-n.getFullYear();
+if(o.getMonth()<n.getMonth()||(o.getMonth()===n.getMonth()&&o.getDate()<n.getDate())) e--;
+return e;
+}
+
+setLang(lang);
+
+api('config?slug='+encodeURIComponent(slug)).then(function(c){
+if(!c || !c.nome){ document.getElementById('loading').textContent = 'Club non trovato / Club not found.'; return; }
+risto = c;
+document.getElementById('h-nome').textContent = c.nome;
+document.getElementById('h-mark').textContent = c.nome.replace(/^L'|^Il |^La |^Lo /i,'').charAt(0).toUpperCase();
+document.getElementById('h-footer').textContent = c.nome + (c.indirizzo ? ' · ' + c.indirizzo : '');
+document.getElementById('g-review').href = c.review_link || '#';
+document.title = 'Club Ospiti — ' + c.nome;
+document.getElementById('loading').style.display = 'none';
+document.getElementById('formview').style.display = 'block';
+}).catch(function(){ document.getElementById('loading').textContent = T[lang].errConn; });
+
+document.getElementById('frm').addEventListener('submit', function(e){
+e.preventDefault();
+var d = T[lang], btn = document.getElementById('sbtn'), err = document.getElementById('err');
+err.style.display = 'none';
+var eta = etaDa(document.getElementById('compleanno').value);
+if(eta===null || eta<18 || eta>98){ err.textContent=d.errEta; err.style.display='block'; return; }
+btn.disabled = true; btn.textContent = d.wait;
+api('iscrivi', { method:'POST', body: JSON.stringify({
+slug: slug, lingua: lang,
+nome: document.getElementById('nome').value.trim(),
+cognome: document.getElementById('cognome').value.trim(),
+telefono: document.getElementById('telefono').value.trim(),
+email: document.getElementById('email').value.trim(),
+compleanno: document.getElementById('compleanno').value,
+anniversario: document.getElementById('anniversario').value || null,
+consenso_marketing: document.getElementById('consensoMarketing').checked,
+consenso_profilazione: document.getElementById('consensoProfilazione').checked,
+presa_visione: document.getElementById('presaVisione').checked
+})}).then(function(res){
+if(res && res.ok){
+var gg = (risto && risto.validita_buono_giorni) || 90;
+document.getElementById('vcode').textContent = res.codice;
+document.getElementById('vmeta').textContent = (res.email_inviata ? d.vMetaMail : d.vMeta).replace('{gg}', gg);
+document.getElementById('formview').style.display = 'none';
+document.getElementById('done').style.display = 'block';
+window.scrollTo(0,0);
+} else {
+var m = {eta:d.errEta, duplicato:d.errDup, dati:d.errDati};
+err.textContent = (res && m[res.errore]) || d.errGen;
+err.style.display='block'; btn.disabled=false; btn.textContent=d.btn;
+}
+}).catch(function(){
+err.textContent = d.errConn; err.style.display='block'; btn.disabled=false; btn.textContent=d.btn;
+});
+});
+</script>
+</body>
+</html>
