@@ -1,69 +1,65 @@
 <!DOCTYPE html>
 <html lang="it">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Verifica buono</title>
-  <style>
-    body{background:#171310;color:#f2ece2;font-family:-apple-system,'Segoe UI',Roboto,sans-serif;text-align:center;padding:40px 20px;line-height:1.5}
-    h1{font-size:22px;font-weight:600}
-    .code{font-family:Menlo,Consolas,monospace;font-size:24px;letter-spacing:3px;color:#c9a35c;margin:14px 0}
-    p{color:#b3a892;font-size:14px}
-    input{padding:12px;border-radius:10px;border:1px solid #3b322a;background:#221c17;color:#f2ece2;font-size:18px;text-align:center;width:140px;outline:none}
-    input:focus{border-color:#c9a35c}
-    button{display:block;margin:14px auto 0;padding:13px 26px;border:none;border-radius:12px;background:#c9a35c;color:#221a0e;font-size:15px;font-weight:600;cursor:pointer}
-    .ok{color:#7fb069}.ko{color:#d9776b}.gold{color:#c9a35c}
-    #pinbox{display:none;margin-top:18px}
-    footer{margin-top:34px;font-size:12px;color:#6d6455}
-    </style>
-  </head>
-  <body>
-    <h1 id="titolo">Verifica in corso…</h1>h1>
-    <div class="code" id="codice">—</div>div>
-    <p id="dettaglio"></p>p>
-    <div id="pinbox">
-      <p>PIN staff per annullare il buono:</p>
-    <input type="password" id="pin" inputmode="numeric" autocomplete="off">
-    <button onclick="riscatta()">Annulla buono (USATO)</button>button>
-    </div>div>
-  <footer id="footer">Gestione buoni</footer>footer>
-  
-  <script src="config.js"></script>
-  <script>
-    var codice = (new URLSearchParams(location.search).get('c')||'').toUpperCase();
-    document.getElementById('codice').textContent = codice || '—';
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Verifica buono</title>
+<style>
+body{background:#171310;color:#f2ece2;font-family:-apple-system,'Segoe UI',Roboto,sans-serif;text-align:center;padding:40px 20px;line-height:1.5}
+h1{font-size:22px;font-weight:600}
+.code{font-family:Menlo,Consolas,monospace;font-size:24px;letter-spacing:3px;color:#c9a35c;margin:14px 0}
+p{color:#b3a892;font-size:14px}
+input{padding:12px;border-radius:10px;border:1px solid #3b322a;background:#221c17;color:#f2ece2;font-size:18px;text-align:center;width:140px;outline:none}
+input:focus{border-color:#c9a35c}
+button{display:block;margin:14px auto 0;padding:13px 26px;border:none;border-radius:12px;background:#c9a35c;color:#221a0e;font-size:15px;font-weight:600;cursor:pointer}
+.ok{color:#7fb069}.ko{color:#d9776b}.gold{color:#c9a35c}
+#pinbox{display:none;margin-top:18px}
+footer{margin-top:34px;font-size:12px;color:#6d6455}
+</style>
+</head>
+<body>
+<h1 id="titolo">Verifica in corso…</h1>
+<div class="code" id="codice">—</div>
+<p id="dettaglio"></p>
+<div id="pinbox">
+<p>PIN staff per annullare il buono:</p>
+<input type="password" id="pin" inputmode="numeric" autocomplete="off">
+<button onclick="riscatta()">Annulla buono (USATO)</button>
+</div>
+<footer id="footer">Gestione buoni</footer>
 
-    function api(body){
-      return fetch(CLUB.SUPABASE_URL+'/functions/v1/riscatta',{
-        method:'POST',
-        headers:{'Content-Type':'application/json','Authorization':'Bearer '+CLUB.SUPABASE_ANON_KEY,'apikey':CLUB.SUPABASE_ANON_KEY},
-        body: JSON.stringify(body)
-      }).then(function(r){return r.json()});
-    }
+<script src="config.js"></script>
+<script>
+var codice = (new URLSearchParams(location.search).get('c')||'').toUpperCase();
+document.getElementById('codice').textContent = codice || '—';
 
-    function mostra(res){
-      var t=document.getElementById('titolo'), d=document.getElementById('dettaglio'), pb=document.getElementById('pinbox');
-      var info=(res.tipo?res.tipo+' — ':'')+(res.cliente||'')+(res.scadenza?' · scade il '+res.scadenza:'');
-      if(res.stato==='VALIDO'){t.textContent='🎟️ Buono VALIDO';t.className='gold';d.textContent=info;pb.style.display='block';}
-      else if(res.stato==='USATO'){t.textContent='⚠️ Buono già utilizzato';t.className='ko';d.textContent=info+(res.usato_at?' · usato: '+res.usato_at:'');pb.style.display='none';}
-      else if(res.stato==='SCADUTO'){t.textContent='⚠️ Buono scaduto';t.className='ko';d.textContent=info;pb.style.display='none';}
-      else if(res.stato==='ANNULLATO'){t.textContent='✅ Buono annullato';t.className='ok';d.textContent=info+' · registrato adesso';pb.style.display='none';}
-      else if(res.errore==='pin'){t.textContent='🔒 PIN errato';t.className='ko';pb.style.display='block';}
-      else {t.textContent='❌ Buono non trovato';t.className='ko';d.textContent='Il codice non risulta emesso.';pb.style.display='none';}
-      if(res.ristorante) document.getElementById('footer').textContent=res.ristorante+' · gestione buoni';
-    }
+function api(body){
+return fetch(CLUB.SUPABASE_URL+'/functions/v1/riscatta',{
+method:'POST',
+headers:{'Content-Type':'application/json','Authorization':'Bearer '+CLUB.SUPABASE_ANON_KEY,'apikey':CLUB.SUPABASE_ANON_KEY},
+body: JSON.stringify(body)
+}).then(function(r){return r.json()});
+}
 
-    function riscatta(){
-      api({codice:codice, pin:document.getElementById('pin').value}).then(mostra)
-      .catch(function(){document.getElementById('titolo').textContent='Connessione non riuscita';});
-        }
+function mostra(res){
+var t=document.getElementById('titolo'), d=document.getElementById('dettaglio'), pb=document.getElementById('pinbox');
+var info=(res.tipo?res.tipo+' — ':'')+(res.cliente||'')+(res.scadenza?' · scade il '+res.scadenza:'');
+if(res.stato==='VALIDO'){t.textContent='🎟️ Buono VALIDO';t.className='gold';d.textContent=info;pb.style.display='block';}
+else if(res.stato==='USATO'){t.textContent='⚠️ Buono già utilizzato';t.className='ko';d.textContent=info+(res.usato_at?' · usato: '+res.usato_at:'');pb.style.display='none';}
+else if(res.stato==='SCADUTO'){t.textContent='⚠️ Buono scaduto';t.className='ko';d.textContent=info;pb.style.display='none';}
+else if(res.stato==='ANNULLATO'){t.textContent='✅ Buono annullato';t.className='ok';d.textContent=info+' · registrato adesso';pb.style.display='none';}
+else if(res.errore==='pin'){t.textContent='🔒 PIN errato';t.className='ko';pb.style.display='block';}
+else {t.textContent='❌ Buono non trovato';t.className='ko';d.textContent='Il codice non risulta emesso.';pb.style.display='none';}
+if(res.ristorante) document.getElementById('footer').textContent=res.ristorante+' · gestione buoni';
+}
 
-              if(codice){ api({codice:codice}).then(mostra).catch(function(){document.getElementById('titolo').textContent='Connessione non riuscita';}); }
-    else { document.getElementById('titolo').textContent='Codice mancante'; }
-  </script>
-  </body>
+function riscatta(){
+api({codice:codice, pin:document.getElementById('pin').value}).then(mostra)
+.catch(function(){document.getElementById('titolo').textContent='Connessione non riuscita';});
+}
+
+if(codice){ api({codice:codice}).then(mostra).catch(function(){document.getElementById('titolo').textContent='Connessione non riuscita';}); }
+else { document.getElementById('titolo').textContent='Codice mancante'; }
+</script>
+</body>
 </html>
-  </script></p>
-  </body>
-  </style></title>
-  </head>
