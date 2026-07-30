@@ -14,6 +14,7 @@ body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSys
 .langbar button.on{opacity:1;border-color:var(--gold);background:rgba(201,163,92,.1)}
 header{text-align:center;margin-bottom:18px}
 .mark{width:54px;height:54px;border:1.5px solid var(--gold);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-family:Georgia,serif;font-size:24px;color:var(--gold);margin-bottom:10px}
+.logo{max-width:150px;max-height:90px;border-radius:12px;background:#fff;padding:8px;margin-bottom:10px;display:none}
 h1{font-family:Georgia,serif;font-weight:400;font-size:24px}
 .tag{color:var(--dim);font-size:12px;letter-spacing:2.5px;text-transform:uppercase;margin-top:3px}
 h2{font-family:Georgia,serif;font-weight:400;font-size:21px;text-align:center;margin:14px 0 6px}
@@ -45,6 +46,14 @@ input:focus{border-color:var(--gold)}
 .gbtn{display:block;padding:15px;border-radius:14px;background:#fff;color:#1a1a1a;font-size:15.5px;font-weight:600;text-decoration:none;margin-top:14px}
 footer{margin-top:30px;text-align:center;font-size:11px;color:#6d6455}
 #loading{text-align:center;padding:60px 0;color:var(--dim)}
+/* ---- Landing FENIVA (V2) ---- */
+#landing{display:none}
+.feat{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid #3b322a;border-radius:14px;padding:14px 15px;margin-bottom:11px}
+.feat .ico{font-size:22px;flex:none;margin-top:1px}
+.feat b{display:block;font-size:14.5px;color:var(--gold-soft);font-weight:600;margin-bottom:2px}
+.feat span{font-size:12.5px;color:var(--dim)}
+.abtn{display:block;text-align:center;padding:15px;border-radius:14px;border:1px solid var(--gold);color:var(--gold);font-size:15.5px;font-weight:600;text-decoration:none;margin-top:20px}
+.abtn.pieno{background:var(--gold);color:#221a0e;border:none}
 </style>
 </head>
 <body>
@@ -55,13 +64,27 @@ footer{margin-top:30px;text-align:center;font-size:11px;color:#6d6455}
 </div>
 
 <header>
+<img class="logo" id="h-logo" alt="" referrerpolicy="no-referrer">
 <div class="mark" id="h-mark">·</div>
 <h1 id="h-nome">…</h1>
-<div class="tag" data-i18n="tag">Club Ospiti</div>
+<div class="tag" id="h-tag" data-i18n="tag">Club Ospiti</div>
 </header>
 
 <div id="loading">…</div>
 
+<!-- ============ LANDING: presentazione servizio FENIVA (senza ?r=) ============ -->
+<div id="landing">
+<p class="sub" data-i18n="ldSub">La piattaforma fedeltà per la ristorazione: i tuoi ospiti diventano il tuo Club.</p>
+<div class="feat"><div class="ico">📲</div><div><b data-i18n="f1t">QR al tavolo</b><span data-i18n="f1s">L'ospite inquadra il QR e si iscrive al Club del tuo locale in 30 secondi, con consensi GDPR raccolti correttamente.</span></div></div>
+<div class="feat"><div class="ico">🎁</div><div><b data-i18n="f2t">Buono di benvenuto</b><span data-i18n="f2s">Iscrizione premiata subito: Buono Dolce con codice e QR via email, annullabile in sala con PIN riservato allo staff.</span></div></div>
+<div class="feat"><div class="ico">🎂</div><div><b data-i18n="f3t">Compleanni e anniversari</b><span data-i18n="f3s">Ogni mattina ricevi il promemoria delle ricorrenze con i messaggi WhatsApp già pronti da inviare.</span></div></div>
+<div class="feat"><div class="ico">⭐</div><div><b data-i18n="f4t">Recensioni Google</b><span data-i18n="f4s">Dopo l'iscrizione, invito diretto a lasciare una recensione sulla tua scheda Google.</span></div></div>
+<div class="feat"><div class="ico">🔐</div><div><b data-i18n="f5t">Dati protetti e solo tuoi</b><span data-i18n="f5s">Dati cifrati su server in Unione Europea, segregati per locale: i contatti del tuo Club appartengono solo a te.</span></div></div>
+<a class="abtn pieno" href="dashboard.html" data-i18n="ldArea">Area Esercenti — Accedi</a>
+<a class="abtn" href="mailto:club@feniva.it?subject=Club%20Ospiti%20-%20richiesta%20informazioni" data-i18n="ldInfo">Vuoi il Club nel tuo locale? Scrivici</a>
+</div>
+
+<!-- ============ Iscrizione ospite (?r=SLUG) ============ -->
 <div id="formview" style="display:none">
 <h2 data-i18n="welcome">Grazie per essere stati nostri ospiti</h2>
 <p class="sub" data-i18n="sub">Entra nel Club: auguri, sorprese e vantaggi riservati.</p>
@@ -106,6 +129,8 @@ footer{margin-top:30px;text-align:center;font-size:11px;color:#6d6455}
 
 <script src="config.js"></script>
 <script>
+var FENIVA_LOGO = 'https://www.i3p.it/assets/loghi_startup/feniva-srl_logo.jpg';
+
 var T = {
 it: {
 tag:'Club Ospiti', welcome:'Grazie per essere stati nostri ospiti',
@@ -128,7 +153,14 @@ vLabel:'Buono di benvenuto', vName:'Buono Dolce · prossima cena',
 vMeta:'Valido {gg} giorni · da mostrare in sala',
 vMetaMail:'Valido {gg} giorni · inviato anche via email con il QR',
 revSub:'Ti è piaciuta la serata? Una recensione ci aiuta tantissimo.',
-gbtn:'Lascia una recensione su Google'
+gbtn:'Lascia una recensione su Google',
+ldSub:'La piattaforma fedeltà per la ristorazione: i tuoi ospiti diventano il tuo Club.',
+f1t:'QR al tavolo', f1s:"L'ospite inquadra il QR e si iscrive al Club del tuo locale in 30 secondi, con consensi GDPR raccolti correttamente.",
+f2t:'Buono di benvenuto', f2s:'Iscrizione premiata subito: Buono Dolce con codice e QR via email, annullabile in sala con PIN riservato allo staff.',
+f3t:'Compleanni e anniversari', f3s:'Ogni mattina ricevi il promemoria delle ricorrenze con i messaggi WhatsApp già pronti da inviare.',
+f4t:'Recensioni Google', f4s:"Dopo l'iscrizione, invito diretto a lasciare una recensione sulla tua scheda Google.",
+f5t:'Dati protetti e solo tuoi', f5s:'Dati cifrati su server in Unione Europea, segregati per locale: i contatti del tuo Club appartengono solo a te.',
+ldArea:'Area Esercenti — Accedi', ldInfo:'Vuoi il Club nel tuo locale? Scrivici'
 },
 en: {
 tag:'Guests Club', welcome:'Thank you for dining with us',
@@ -151,11 +183,18 @@ vLabel:'Welcome voucher', vName:'Dessert Voucher · next dinner',
 vMeta:'Valid {gg} days · show it to our staff',
 vMetaMail:'Valid {gg} days · also sent to your email with a QR code',
 revSub:'Enjoyed your evening? A review helps us enormously.',
-gbtn:'Leave a review on Google'
+gbtn:'Leave a review on Google',
+ldSub:'The loyalty platform for restaurants: turn your guests into your Club.',
+f1t:'QR on the table', f1s:'Guests scan the QR and join your Club in 30 seconds, with GDPR consents properly collected.',
+f2t:'Welcome voucher', f2s:'Sign-up rewarded instantly: a Dessert Voucher with code and QR by email, redeemed in-house with a staff-only PIN.',
+f3t:'Birthdays & anniversaries', f3s:'Every morning you get a reminder of upcoming occasions with ready-to-send WhatsApp messages.',
+f4t:'Google reviews', f4s:'After signing up, guests are invited to leave a review on your Google listing.',
+f5t:'Your data, protected', f5s:'Encrypted data on EU servers, segregated per venue: your Club contacts belong to you alone.',
+ldArea:'Merchant Area — Sign in', ldInfo:'Want the Club in your venue? Contact us'
 }
 };
 
-var slug = new URLSearchParams(location.search).get('r') || CLUB.DEFAULT_SLUG;
+var slug = new URLSearchParams(location.search).get('r'); // V2: nessun default → landing FENIVA
 var risto = null;
 var lang = (navigator.language||'it').toLowerCase().indexOf('it')===0 ? 'it' : 'en';
 
@@ -172,6 +211,13 @@ document.querySelectorAll('[data-i18n]').forEach(function(el){ if(d[el.dataset.i
 document.querySelectorAll('[data-i18n-html]').forEach(function(el){ if(d[el.dataset.i18nHtml]) el.innerHTML = d[el.dataset.i18nHtml]; });
 document.getElementById('lang-it').classList.toggle('on', l==='it');
 document.getElementById('lang-en').classList.toggle('on', l==='en');
+}
+
+function mostraLogo(url, alt){
+var img = document.getElementById('h-logo');
+img.onload = function(){ img.style.display='inline-block'; document.getElementById('h-mark').style.display='none'; };
+img.onerror = function(){ img.style.display='none'; document.getElementById('h-mark').style.display='inline-flex'; };
+img.alt = alt || 'logo'; img.src = url;
 }
 
 (function(){ // limiti età 18–98 sul date picker
@@ -191,17 +237,29 @@ return e;
 
 setLang(lang);
 
+if(!slug){
+// ===== Landing FENIVA: solo presentazione del servizio =====
+document.getElementById('h-nome').textContent = 'Club Ospiti';
+document.getElementById('h-tag').textContent = 'by FENIVA';
+document.getElementById('h-footer').textContent = 'FENIVA S.r.l. · club@feniva.it';
+mostraLogo(FENIVA_LOGO, 'FENIVA');
+document.title = 'Club Ospiti — by FENIVA';
+document.getElementById('loading').style.display = 'none';
+document.getElementById('landing').style.display = 'block';
+} else {
 api('config?slug='+encodeURIComponent(slug)).then(function(c){
 if(!c || !c.nome){ document.getElementById('loading').textContent = 'Club non trovato / Club not found.'; return; }
 risto = c;
 document.getElementById('h-nome').textContent = c.nome;
 document.getElementById('h-mark').textContent = c.nome.replace(/^L'|^Il |^La |^Lo /i,'').charAt(0).toUpperCase();
+if(c.logo_url) mostraLogo(c.logo_url, c.nome);
 document.getElementById('h-footer').textContent = c.nome + (c.indirizzo ? ' · ' + c.indirizzo : '');
 document.getElementById('g-review').href = c.review_link || '#';
 document.title = 'Club Ospiti — ' + c.nome;
 document.getElementById('loading').style.display = 'none';
 document.getElementById('formview').style.display = 'block';
 }).catch(function(){ document.getElementById('loading').textContent = T[lang].errConn; });
+}
 
 document.getElementById('frm').addEventListener('submit', function(e){
 e.preventDefault();

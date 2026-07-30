@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Club Ospiti — Area Esercenti</title>
+<style>
+:root{--bg:#171310;--card:#221c17;--gold:#c9a35c;--gold-soft:#e8d5ae;--ink:#f2ece2;--dim:#b3a892;--danger:#d9776b;--ok:#7fbf7f}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.5}
+.wrap{max-width:980px;margin:0 auto;padding:18px 16px 50px}
+header{display:flex;align-items:center;gap:14px;margin-bottom:20px;flex-wrap:wrap}
+.logo{max-height:56px;max-width:120px;border-radius:10px;background:#fff;padding:5px;display:none}
+h1{font-family:Georgia,serif;font-weight:400;font-size:22px}
+.tag{color:var(--dim);font-size:11px;letter-spacing:2.5px;text-transform:uppercase}
+.spacer{flex:1}
+.who{font-size:12px;color:var(--dim);text-align:right}
+.card{background:var(--card);border:1px solid #3b322a;border-radius:16px;padding:18px;margin-bottom:16px}
+.card h2{font-family:Georgia,serif;font-weight:400;font-size:19px;margin-bottom:10px}
+label{display:block;font-size:12.5px;color:var(--dim);margin:10px 0 4px}
+input,select,textarea{width:100%;padding:11px 13px;border-radius:11px;border:1px solid #3b322a;background:#1b1613;color:var(--ink);font-size:15px;outline:none}
+input:focus,select:focus{border-color:var(--gold)}
+.btn{display:inline-block;padding:12px 18px;border:none;border-radius:12px;background:var(--gold);color:#221a0e;font-size:14.5px;font-weight:600;cursor:pointer}
+.btn.sec{background:none;border:1px solid var(--gold);color:var(--gold)}
+.btn.mini{padding:7px 11px;font-size:12.5px;border-radius:9px}
+.btn.rosso{background:none;border:1px solid var(--danger);color:var(--danger)}
+.btn:disabled{opacity:.5}
+.err{color:var(--danger);font-size:13px;margin-top:8px;display:none}
+.okmsg{color:var(--ok);font-size:13px;margin-top:8px;display:none}
+.login-box{max-width:400px;margin:6vh auto 0}
+.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.toolbar input{max-width:260px}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{color:var(--dim);text-align:left;font-weight:500;font-size:11.5px;text-transform:uppercase;letter-spacing:1px;padding:8px 9px;border-bottom:1px solid #3b322a}
+td{padding:9px;border-bottom:1px solid #2b241d;vertical-align:top}
+tr:hover td{background:rgba(201,163,92,.04)}
+.pill{display:inline-block;font-size:11px;padding:2px 9px;border-radius:99px;border:1px solid #3b322a;color:var(--dim)}
+.pill.on{border-color:var(--ok);color:var(--ok)}
+.pill.off{border-color:var(--danger);color:var(--danger)}
+.azioni{white-space:nowrap}
+.azioni button{margin:0 2px 4px 0}
+.overlay{position:fixed;inset:0;background:rgba(10,8,6,.75);display:none;align-items:flex-start;justify-content:center;padding:5vh 15px;overflow:auto;z-index:50}
+.modal{background:var(--card);border:1px solid var(--gold);border-radius:16px;padding:20px;max-width:460px;width:100%}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+footer{margin-top:26px;text-align:center;font-size:11px;color:#6d6455}
+.hint{font-size:11.5px;color:#8a8071;margin-top:3px}
+#view-otp,#view-app{display:none}
+@media(max-width:640px){.hide-sm{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+<img class="logo" id="h-logo" alt="" referrerpolicy="no-referrer">
+<div><h1 id="h-nome">Area Esercenti</h1><div class="tag">Club Ospiti · by FENIVA</div></div>
+<div class="spacer"></div>
+<div class="who" id="who" style="display:none"><span id="who-email"></span><br><button class="btn sec mini" onclick="esci()">Esci</button></div>
+</header>
+
+<!-- ========== LOGIN ========== -->
+<div id="view-login" class="login-box card">
+<h2>Accesso esercente</h2>
+<p class="hint">Riceverai un codice di conferma via email. Nessuna password da ricordare.</p>
+<label>Codice esercente (fornito da FENIVA)</label>
+<input id="l-slug" placeholder="es. losto" autocapitalize="none">
+<label>Email</label>
+<input id="l-email" type="email" placeholder="email@esercente.it" autocapitalize="none">
+<div style="margin-top:16px"><button class="btn" id="l-btn" onclick="inviaOtp()">Invia codice di accesso</button></div>
+<div class="err" id="l-err"></div>
+</div>
+
+<!-- ========== OTP ========== -->
+<div id="view-otp" class="login-box card">
+<h2>Controlla la posta</h2>
+<p class="hint">Abbiamo inviato un codice di conferma a <b id="o-email"></b>. Inseriscilo qui sotto (vale pochi minuti).</p>
+<label>Codice di conferma</label>
+<input id="o-code" inputmode="numeric" maxlength="8" placeholder="123456">
+<div style="margin-top:16px">
+<button class="btn" id="o-btn" onclick="verificaOtp()">Entra</button>
+<button class="btn sec" onclick="mostra('login')">Indietro</button>
+</div>
+<div class="err" id="o-err"></div>
+</div>
+
+<!-- ========== APP ========== -->
+<div id="view-app">
+
+<div class="card" id="admin-bar" style="display:none">
+<h2>Console FENIVA</h2>
+<div class="toolbar">
+<select id="a-tenant" style="max-width:320px" onchange="cambiaTenant()"></select>
+<button class="btn sec" onclick="apriNuovoEsercente()">➕ Nuovo esercente</button>
+<button class="btn sec" onclick="vediAudit()">🧾 Audit log</button>
+</div>
+<div class="hint">Accesso di assistenza FENIVA: ogni operazione viene registrata nell'audit log.</div>
+</div>
+
+<div class="card">
+<div class="toolbar">
+<input id="cerca" placeholder="Cerca nome, telefono, email…" oninput="filtraDebounce()">
+<button class="btn sec" onclick="caricaClienti()">↺ Aggiorna</button>
+<button class="btn" onclick="esportaXls()">⬇ Scarica Excel</button>
+<div class="spacer"></div>
+<span class="hint" id="conteggio"></span>
+</div>
+<div style="overflow-x:auto">
+<table>
+<thead><tr><th>Nome</th><th>Telefono</th><th class="hide-sm">Email</th><th class="hide-sm">Compleanno</th><th class="hide-sm">Anniversario</th><th>Consenso</th><th>Azioni</th></tr></thead>
+<tbody id="tbody"><tr><td colspan="7" style="color:var(--dim)">Caricamento…</td></tr></tbody>
+</table>
+</div>
+</div>
+
+<div class="card">
+<h2>Impostazioni locale</h2>
+<div class="row2">
+<div><label>Nuovo PIN staff (4–8 cifre)</label><input id="pin-nuovo" inputmode="numeric" maxlength="8"></div>
+<div style="align-self:end"><button class="btn sec" onclick="cambiaPin()">Cambia PIN</button></div>
+</div>
+<div class="okmsg" id="set-ok"></div><div class="err" id="set-err"></div>
+</div>
+
+</div>
+
+<footer>FENIVA S.r.l. · club@feniva.it · Dati trattati in UE — accessi e operazioni registrati (audit)</footer>
+</div>
+
+<!-- ========== MODALE MODIFICA CLIENTE ========== -->
+<div class="overlay" id="ov-edit">
+<div class="modal">
+<h2 style="font-family:Georgia,serif;font-weight:400;margin-bottom:6px">Modifica contatto</h2>
+<input type="hidden" id="e-id">
+<div class="row2">
+<div><label>Nome *</label><input id="e-nome"></div>
+<div><label>Cognome</label><input id="e-cognome"></div>
+</div>
+<label>Telefono *</label><input id="e-telefono">
+<label>Email</label><input id="e-email" type="email">
+<div class="row2">
+<div><label>Compleanno</label><input id="e-compleanno" type="date"></div>
+<div><label>Anniversario</label><input id="e-anniversario" type="date"></div>
+</div>
+<label>Note</label><input id="e-note">
+<div style="margin-top:16px">
+<button class="btn" onclick="salvaModifica()">Salva</button>
+<button class="btn sec" onclick="chiudi('ov-edit')">Annulla</button>
+</div>
+<div class="err" id="e-err"></div>
+</div>
+</div>
+
+<!-- ========== MODALE NUOVO ESERCENTE (solo admin) ========== -->
+<div class="overlay" id="ov-nuovo">
+<div class="modal">
+<h2 style="font-family:Georgia,serif;font-weight:400;margin-bottom:6px">Nuovo esercente</h2>
+<div class="row2">
+<div><label>Codice/slug * <span class="hint">(→ QR /?r=slug)</span></label><input id="n-slug" placeholder="es. trattoriaverdi" autocapitalize="none"></div>
+<div><label>PIN staff (vuoto = generato)</label><input id="n-pin" inputmode="numeric" maxlength="8"></div>
+</div>
+<label>Nome locale *</label><input id="n-nome">
+<label>Indirizzo</label><input id="n-indirizzo">
+<label>Email titolare * <span class="hint">(accesso dashboard + digest)</span></label><input id="n-email" type="email">
+<label>Cellulare titolare <span class="hint">(assistenza / WhatsApp)</span></label><input id="n-cellulare" type="tel" placeholder="+39 ...">
+<label>Google Place ID <span class="hint">(oppure link recensione completo qui sotto)</span></label><input id="n-placeid" placeholder="ChIJ...">
+<label>Link recensione Google (alternativo al Place ID)</label><input id="n-review" placeholder="https://search.google.com/local/writereview?placeid=...">
+<label>URL logo (jpg/png)</label><input id="n-logo" placeholder="https://...">
+<div style="margin-top:16px">
+<button class="btn" id="n-btn" onclick="creaEsercente()">Crea esercente</button>
+<button class="btn sec" onclick="chiudi('ov-nuovo')">Annulla</button>
+</div>
+<div class="okmsg" id="n-ok"></div><div class="err" id="n-err"></div>
+</div>
+</div>
+
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+var sb = supabase.createClient(CLUB.SUPABASE_URL, CLUB.SUPABASE_ANON_KEY);
+var sessione = null, profilo = null, isAdmin = false, tenantSel = null, clienti = [], timerF = null;
+
+function mostra(v){
+['login','otp','app'].forEach(function(x){ document.getElementById('view-'+x).style.display = (x===v?'block':'none'); });
+}
+function chiudi(id){ document.getElementById(id).style.display='none'; }
+function apri(id){ document.getElementById(id).style.display='flex'; }
+function err(id,msg){ var e=document.getElementById(id); e.textContent=msg||''; e.style.display=msg?'block':'none'; }
+function okmsg(id,msg){ var e=document.getElementById(id); e.textContent=msg||''; e.style.display=msg?'block':'none'; }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+function dataIt(iso){ return iso ? iso.split('-').reverse().join('/') : ''; }
+
+function api(fn, body){
+return fetch(CLUB.SUPABASE_URL + '/functions/v1/' + fn, {
+method:'POST',
+headers:{ 'Content-Type':'application/json', 'apikey':CLUB.SUPABASE_ANON_KEY,
+'Authorization':'Bearer ' + (sessione ? sessione.access_token : CLUB.SUPABASE_ANON_KEY) },
+body: JSON.stringify(body||{})
+}).then(function(r){ return r.json(); });
+}
+function corpo(b){ b = b||{}; if(isAdmin && tenantSel) b.ristorante_id = tenantSel; return b; }
+
+// ---------- LOGIN OTP ----------
+function inviaOtp(){
+err('l-err','');
+var email = document.getElementById('l-email').value.trim().toLowerCase();
+var slug = document.getElementById('l-slug').value.trim().toLowerCase();
+if(!email){ err('l-err','Inserisci la tua email.'); return; }
+sessionStorage.setItem('club_slug_atteso', slug);
+document.getElementById('l-btn').disabled = true;
+sb.auth.signInWithOtp({ email: email, options: { shouldCreateUser: false } }).then(function(r){
+document.getElementById('l-btn').disabled = false;
+if(r.error){ err('l-err','Accesso non disponibile per questa email. Contatta FENIVA (club@feniva.it).'); return; }
+document.getElementById('o-email').textContent = email;
+sessionStorage.setItem('club_email', email);
+mostra('otp');
+});
+}
+
+function verificaOtp(){
+err('o-err','');
+var email = sessionStorage.getItem('club_email');
+var code = document.getElementById('o-code').value.trim();
+if(!code){ err('o-err','Inserisci il codice ricevuto via email.'); return; }
+document.getElementById('o-btn').disabled = true;
+sb.auth.verifyOtp({ email: email, token: code, type: 'email' }).then(function(r){
+document.getElementById('o-btn').disabled = false;
+if(r.error || !r.data.session){ err('o-err','Codice non valido o scaduto. Riprova.'); return; }
+sessione = r.data.session;
+avvia();
+});
+}
+
+function esci(){ sb.auth.signOut().then(function(){ location.reload(); }); }
+
+// ---------- AVVIO ----------
+sb.auth.getSession().then(function(r){
+if(r.data.session){ sessione = r.data.session; avvia(); } else mostra('login');
+});
+
+function avvia(){
+api('esercente', corpo({azione:'profilo'})).then(function(res){
+if(!res.ok){
+if(res.errore==='nessun_ristorante'){ err('l-err','Utente non associato a nessun locale. Contatta FENIVA.'); mostra('login'); return; }
+err('l-err','Errore di accesso: '+(res.errore||'')); mostra('login'); return;
+}
+isAdmin = !!res.admin;
+profilo = res.ristorante;
+// controllo soft sul codice esercente digitato (la sicurezza vera è la RLS)
+var atteso = sessionStorage.getItem('club_slug_atteso');
+if(atteso && profilo && !isAdmin && profilo.slug !== atteso){
+err('l-err','Il codice esercente non corrisponde a questo account.'); esci(); return;
+}
+document.getElementById('who').style.display='block';
+document.getElementById('who-email').textContent = (sessione.user && sessione.user.email) || '';
+intestazione();
+mostra('app');
+if(isAdmin){ document.getElementById('admin-bar').style.display='block'; caricaTenants(); }
+if(profilo) caricaClienti();
+else document.getElementById('tbody').innerHTML='<tr><td colspan="7" style="color:var(--dim)">Seleziona un locale dalla Console FENIVA…</td></tr>';
+});
+}
+
+function intestazione(){
+if(!profilo) return;
+document.getElementById('h-nome').textContent = profilo.nome || 'Area Esercenti';
+var img = document.getElementById('h-logo');
+if(profilo.logo_url){ img.src = profilo.logo_url; img.onload=function(){img.style.display='block';}; img.onerror=function(){img.style.display='none';}; }
+else img.style.display='none';
+}
+
+// ---------- ADMIN: tenants ----------
+function caricaTenants(){
+api('admin', {azione:'ristoranti'}).then(function(res){
+if(!res.ok) return;
+var sel = document.getElementById('a-tenant');
+sel.innerHTML = res.ristoranti.map(function(r){
+return '<option value="'+r.id+'"'+(profilo && r.id===profilo.id?' selected':'')+'>'+esc(r.nome)+' ('+esc(r.slug)+')'+(r.attivo?'':' — DISATTIVO')+'</option>';
+}).join('');
+tenantSel = sel.value;
+if(!profilo && tenantSel) cambiaTenant(); // admin senza tenant proprio: aggancia il primo
+});
+}
+function cambiaTenant(){
+tenantSel = document.getElementById('a-tenant').value;
+api('esercente', corpo({azione:'profilo'})).then(function(res){
+if(res.ok){ profilo = res.ristorante; intestazione(); caricaClienti(); }
+});
+}
+
+// ---------- CLIENTI ----------
+function caricaClienti(){
+var cerca = document.getElementById('cerca').value.trim();
+api('esercente', corpo({azione:'lista', cerca: cerca||undefined})).then(function(res){
+if(!res.ok){ document.getElementById('tbody').innerHTML='<tr><td colspan="7" style="color:var(--danger)">Errore: '+esc(res.errore)+'</td></tr>'; return; }
+clienti = res.clienti || [];
+render();
+});
+}
+function filtraDebounce(){ clearTimeout(timerF); timerF = setTimeout(caricaClienti, 350); }
+
+function render(){
+document.getElementById('conteggio').textContent = clienti.length + ' contatti';
+if(!clienti.length){ document.getElementById('tbody').innerHTML='<tr><td colspan="7" style="color:var(--dim)">Nessun contatto.</td></tr>'; return; }
+document.getElementById('tbody').innerHTML = clienti.map(function(c){
+var revocato = !!c.consenso_marketing_revocato_at;
+return '<tr>'+
+'<td><b>'+esc(c.nome)+' '+esc(c.cognome||'')+'</b></td>'+
+'<td>'+esc(c.telefono)+'</td>'+
+'<td class="hide-sm">'+esc(c.email||'')+'</td>'+
+'<td class="hide-sm">'+dataIt(c.compleanno)+'</td>'+
+'<td class="hide-sm">'+dataIt(c.anniversario)+'</td>'+
+'<td><span class="pill '+(revocato?'off':'on')+'">'+(revocato?'Revocato':'Attivo')+'</span></td>'+
+'<td class="azioni">'+
+'<button class="btn sec mini" onclick="apriModifica(\''+c.id+'\')">✏️</button>'+
+(revocato
+? '<button class="btn sec mini" title="Riattiva consenso" onclick="azioneCliente(\'riattiva\',\''+c.id+'\')">🔔</button>'
+: '<button class="btn rosso mini" title="Non contattare più (opt-out)" onclick="azioneCliente(\'optout\',\''+c.id+'\')">🔕</button>')+
+'<button class="btn rosso mini" id="del-'+c.id+'" title="Elimina definitivamente (art. 17)" onclick="eliminaCliente(\''+c.id+'\')">🗑</button>'+
+'</td></tr>';
+}).join('');
+}
+
+function apriModifica(id){
+var c = clienti.find(function(x){return x.id===id;}); if(!c) return;
+err('e-err','');
+document.getElementById('e-id').value = c.id;
+document.getElementById('e-nome').value = c.nome||'';
+document.getElementById('e-cognome').value = c.cognome||'';
+document.getElementById('e-telefono').value = c.telefono||'';
+document.getElementById('e-email').value = c.email||'';
+document.getElementById('e-compleanno').value = c.compleanno||'';
+document.getElementById('e-anniversario').value = c.anniversario||'';
+document.getElementById('e-note').value = c.note||'';
+apri('ov-edit');
+}
+
+function salvaModifica(){
+err('e-err','');
+var dati = {
+nome: document.getElementById('e-nome').value.trim(),
+cognome: document.getElementById('e-cognome').value.trim(),
+telefono: document.getElementById('e-telefono').value.trim(),
+email: document.getElementById('e-email').value.trim(),
+compleanno: document.getElementById('e-compleanno').value,
+anniversario: document.getElementById('e-anniversario').value,
+note: document.getElementById('e-note').value.trim()
+};
+if(!dati.nome || !dati.telefono){ err('e-err','Nome e telefono sono obbligatori.'); return; }
+api('esercente', corpo({azione:'modifica', cliente_id: document.getElementById('e-id').value, dati: dati})).then(function(res){
+if(!res.ok){ err('e-err','Errore: '+esc(res.dettaglio||res.errore)); return; }
+chiudi('ov-edit'); caricaClienti();
+});
+}
+
+function azioneCliente(az, id){
+api('esercente', corpo({azione: az, cliente_id: id})).then(function(res){ if(res.ok) caricaClienti(); });
+}
+
+function eliminaCliente(id){ // doppio click di conferma (niente popup bloccanti)
+var b = document.getElementById('del-'+id);
+if(b.dataset.conferma){ api('esercente', corpo({azione:'cancella', cliente_id:id})).then(function(res){ if(res.ok) caricaClienti(); }); return; }
+b.dataset.conferma = '1'; b.textContent = 'Confermi?';
+setTimeout(function(){ if(document.getElementById('del-'+id)){ b.removeAttribute('data-conferma'); b.textContent='🗑'; } }, 3500);
+}
+
+// ---------- EXPORT XLS (tracciato lato server nell'audit log) ----------
+function esportaXls(){
+api('esercente', corpo({azione:'export'})).then(function(res){
+if(!res.ok){ alertRiga('Errore export: '+(res.errore||'')); return; }
+var righe = (res.clienti||[]).map(function(c){
+return {
+'Nome': c.nome, 'Cognome': c.cognome||'', 'Telefono': c.telefono, 'Email': c.email||'',
+'Compleanno': dataIt(c.compleanno), 'Anniversario': dataIt(c.anniversario), 'Lingua': c.lingua,
+'Consenso marketing': dataIt((c.consenso_marketing_at||'').slice(0,10)),
+'Consenso profilazione': dataIt((c.consenso_profilazione_at||'').slice(0,10)),
+'Revocato il': dataIt((c.consenso_marketing_revocato_at||'').slice(0,10)),
+'Iscritto il': dataIt((c.created_at||'').slice(0,10)), 'Note': c.note||''
+};
+});
+var ws = XLSX.utils.json_to_sheet(righe);
+var wb = XLSX.utils.book_new();
+XLSX.utils.book_append_sheet(wb, ws, 'Contatti');
+var nome = 'club-contatti-' + ((profilo&&profilo.slug)||'export') + '-' + new Date().toISOString().slice(0,10) + '.xlsx';
+XLSX.writeFile(wb, nome);
+});
+}
+function alertRiga(m){ okmsg('set-ok',''); err('set-err', m); }
+
+// ---------- PIN ----------
+function cambiaPin(){
+okmsg('set-ok',''); err('set-err','');
+var pin = document.getElementById('pin-nuovo').value.trim();
+if(!/^[0-9]{4,8}$/.test(pin)){ err('set-err','Il PIN deve avere 4–8 cifre.'); return; }
+api('esercente', corpo({azione:'pin', pin: pin})).then(function(res){
+if(res.ok){ okmsg('set-ok','PIN aggiornato. Comunicalo solo allo staff.'); document.getElementById('pin-nuovo').value=''; }
+else err('set-err','Errore: '+(res.dettaglio||res.errore));
+});
+}
+
+// ---------- ADMIN: nuovo esercente / audit ----------
+function apriNuovoEsercente(){ err('n-err',''); okmsg('n-ok',''); apri('ov-nuovo'); }
+
+function creaEsercente(){
+err('n-err',''); okmsg('n-ok','');
+var b = {
+azione:'esercente-crea',
+slug: document.getElementById('n-slug').value.trim(),
+nome: document.getElementById('n-nome').value.trim(),
+indirizzo: document.getElementById('n-indirizzo').value.trim(),
+email_titolare: document.getElementById('n-email').value.trim(),
+cellulare: document.getElementById('n-cellulare').value.trim(),
+place_id: document.getElementById('n-placeid').value.trim() || undefined,
+review_link: document.getElementById('n-review').value.trim() || undefined,
+logo_url: document.getElementById('n-logo').value.trim() || undefined,
+pin: document.getElementById('n-pin').value.trim() || undefined
+};
+if(!b.slug || !b.nome || !b.email_titolare){ err('n-err','Slug, nome locale ed email titolare sono obbligatori.'); return; }
+document.getElementById('n-btn').disabled = true;
+api('admin', b).then(function(res){
+document.getElementById('n-btn').disabled = false;
+if(!res.ok){ err('n-err','Errore: '+esc(res.dettaglio||res.errore)); return; }
+okmsg('n-ok','Creato! QR: '+res.qr_url+' · PIN staff: '+res.pin_staff+' — il titolare accede con la sua email (codice: '+res.slug+').');
+caricaTenants();
+});
+}
+
+function vediAudit(){
+api('admin', {azione:'audit', ristorante_id: tenantSel||undefined}).then(function(res){
+if(!res.ok) return;
+var w = (res.audit||[]).map(function(a){
+return new Date(a.at).toLocaleString('it-IT') + ' · ' + (a.email||'') + ' · ' + a.azione + (a.dettaglio&&Object.keys(a.dettaglio).length? ' · '+JSON.stringify(a.dettaglio):'');
+}).join('\n');
+var blob = new Blob([w||'(vuoto)'], {type:'text/plain'});
+var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+a.download = 'audit-log.txt'; a.click();
+});
+}
+</script>
+</body>
+</html>
