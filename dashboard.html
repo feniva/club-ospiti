@@ -91,6 +91,7 @@ footer{margin-top:26px;text-align:center;font-size:11px;color:#6d6455}
 <div class="toolbar">
 <select id="a-tenant" style="max-width:320px" onchange="cambiaTenant()"></select>
 <button class="btn sec" onclick="apriNuovoEsercente()">➕ Nuovo esercente</button>
+<button class="btn sec" onclick="apriModEsercente()">✏️ Modifica esercente</button>
 <button class="btn sec" onclick="vediAudit()">🧾 Audit log</button>
 </div>
 <div class="hint">Accesso di assistenza FENIVA: ogni operazione viene registrata nell'audit log.</div>
@@ -170,6 +171,33 @@ footer{margin-top:26px;text-align:center;font-size:11px;color:#6d6455}
 <button class="btn sec" onclick="chiudi('ov-nuovo')">Annulla</button>
 </div>
 <div class="okmsg" id="n-ok"></div><div class="err" id="n-err"></div>
+</div>
+</div>
+
+<!-- ========== MODALE MODIFICA ESERCENTE (solo admin) ========== -->
+<div class="overlay" id="ov-mod">
+<div class="modal">
+<h2 style="font-family:Georgia,serif;font-weight:400;margin-bottom:6px">Modifica esercente</h2>
+<label>Nome locale *</label><input id="m-nome">
+<label>Indirizzo</label><input id="m-indirizzo">
+<label>Email titolare <span class="hint">(destinatario digest ricorrenze)</span></label><input id="m-email" type="email">
+<label>Cellulare titolare</label><input id="m-cellulare" type="tel">
+<label>Link recensione Google</label><input id="m-review">
+<label>URL logo</label><input id="m-logo">
+<label style="display:flex;gap:8px;align-items:center;margin-top:12px;font-size:13.5px;color:var(--ink)"><input type="checkbox" id="m-attivo" style="width:auto;accent-color:var(--gold)"> Attivo (QR e iscrizioni abilitati)</label>
+<div style="margin-top:12px;border-top:1px solid #3b322a;padding-top:10px">
+<b style="font-size:13px;color:var(--gold-soft)">Accessi dashboard (login OTP)</b>
+<div id="m-utenti" class="hint" style="margin-top:6px">…</div>
+<div class="row2" style="margin-top:8px">
+<input id="m-nuova-email" type="email" placeholder="nuova email di accesso">
+<button class="btn sec" onclick="collegaUtente()">Collega</button>
+</div>
+</div>
+<div style="margin-top:16px">
+<button class="btn" onclick="salvaEsercente()">Salva</button>
+<button class="btn sec" onclick="chiudi('ov-mod')">Chiudi</button>
+</div>
+<div class="okmsg" id="m-ok"></div><div class="err" id="m-err"></div>
 </div>
 </div>
 
@@ -422,6 +450,72 @@ document.getElementById('n-btn').disabled = false;
 if(!res.ok){ err('n-err','Errore: '+esc(res.dettaglio||res.errore)); return; }
 okmsg('n-ok','Creato! QR: '+res.qr_url+' · PIN staff: '+res.pin_staff+' — il titolare accede con la sua email (codice: '+res.slug+').');
 caricaTenants();
+});
+}
+
+// ---------- ADMIN: modifica esercente / accessi ----------
+function apriModEsercente(){
+if(!profilo){ alertRiga('Seleziona prima un locale dalla Console FENIVA.'); return; }
+err('m-err',''); okmsg('m-ok','');
+document.getElementById('m-nome').value = profilo.nome||'';
+document.getElementById('m-indirizzo').value = profilo.indirizzo||'';
+document.getElementById('m-email').value = profilo.email_titolare||'';
+document.getElementById('m-cellulare').value = profilo.cellulare_titolare||'';
+document.getElementById('m-review').value = profilo.review_link||'';
+document.getElementById('m-logo').value = profilo.logo_url||'';
+document.getElementById('m-attivo').checked = profilo.attivo!==false;
+caricaAccessi();
+apri('ov-mod');
+}
+
+function caricaAccessi(){
+document.getElementById('m-utenti').textContent = 'Carico…';
+api('admin', {azione:'utenti', ristorante_id: profilo.id}).then(function(res){
+if(!res.ok){ document.getElementById('m-utenti').textContent = 'Errore nel caricamento accessi.'; return; }
+if(!(res.utenti||[]).length){ document.getElementById('m-utenti').textContent = 'Nessun accesso collegato.'; return; }
+document.getElementById('m-utenti').innerHTML = res.utenti.map(function(u){
+return '<div style="display:flex;gap:8px;align-items:center;margin:3px 0"><span style="flex:1">'+esc(u.email)+' <span class="pill">'+esc(u.ruolo)+'</span></span>'+
+'<button class="btn rosso mini" id="scol-'+u.user_id+'" onclick="scollegaUtente(\''+u.user_id+'\')">Scollega</button></div>';
+}).join('');
+});
+}
+
+function collegaUtente(){
+var em = document.getElementById('m-nuova-email').value.trim();
+if(!em){ err('m-err','Inserisci l\'email da collegare.'); return; }
+err('m-err','');
+api('admin', {azione:'utente-collega', email: em, ristorante_id: profilo.id}).then(function(res){
+if(!res.ok){ err('m-err','Errore: '+esc(res.dettaglio||res.errore)); return; }
+document.getElementById('m-nuova-email').value='';
+okmsg('m-ok','Accesso collegato: '+em+' — entra con codice "'+profilo.slug+'" + OTP via email.');
+caricaAccessi();
+});
+}
+
+function scollegaUtente(uid){ // doppio click di conferma
+var b = document.getElementById('scol-'+uid);
+if(!b.dataset.conferma){ b.dataset.conferma='1'; b.textContent='Confermi?'; setTimeout(function(){ var x=document.getElementById('scol-'+uid); if(x){ x.removeAttribute('data-conferma'); x.textContent='Scollega'; } },3500); return; }
+api('admin', {azione:'utente-scollega', user_id: uid, ristorante_id: profilo.id}).then(function(res){
+if(res.ok) caricaAccessi(); else err('m-err','Errore: '+esc(res.dettaglio||res.errore));
+});
+}
+
+function salvaEsercente(){
+err('m-err',''); okmsg('m-ok','');
+var dati = {
+nome: document.getElementById('m-nome').value.trim(),
+indirizzo: document.getElementById('m-indirizzo').value.trim(),
+email_titolare: document.getElementById('m-email').value.trim(),
+cellulare_titolare: document.getElementById('m-cellulare').value.trim(),
+review_link: document.getElementById('m-review').value.trim(),
+logo_url: document.getElementById('m-logo').value.trim(),
+attivo: document.getElementById('m-attivo').checked
+};
+if(!dati.nome){ err('m-err','Il nome del locale è obbligatorio.'); return; }
+api('admin', {azione:'esercente-aggiorna', ristorante_id: profilo.id, dati: dati}).then(function(res){
+if(!res.ok){ err('m-err','Errore: '+esc(res.dettaglio||res.errore)); return; }
+okmsg('m-ok','Salvato.');
+caricaTenants(); cambiaTenant();
 });
 }
 

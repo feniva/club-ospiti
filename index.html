@@ -10,8 +10,9 @@
 body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.55}
 .wrap{max-width:430px;margin:0 auto;padding:18px 20px 40px}
 .langbar{text-align:right;margin-bottom:4px}
-.langbar button{background:none;border:1px solid transparent;border-radius:9px;font-size:22px;padding:3px 7px;cursor:pointer;opacity:.45}
-.langbar button.on{opacity:1;border-color:var(--gold);background:rgba(201,163,92,.1)}
+.langbar button{background:var(--card);border:1px solid #3b322a;border-radius:9px;font-size:18px;padding:5px 10px;cursor:pointer;opacity:.85;color:var(--dim)}
+.langbar button span{font-size:12.5px;font-weight:600;letter-spacing:1px;vertical-align:middle;margin-left:4px}
+.langbar button.on{opacity:1;border-color:var(--gold);background:rgba(201,163,92,.14);color:var(--gold-soft)}
 header{text-align:center;margin-bottom:18px}
 .mark{width:54px;height:54px;border:1.5px solid var(--gold);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-family:Georgia,serif;font-size:24px;color:var(--gold);margin-bottom:10px}
 .logo{max-width:150px;max-height:90px;border-radius:12px;background:#fff;padding:8px;margin-bottom:10px;display:none}
@@ -59,8 +60,8 @@ footer{margin-top:30px;text-align:center;font-size:11px;color:#6d6455}
 <body>
 <div class="wrap">
 <div class="langbar">
-<button type="button" id="lang-it" onclick="setLang('it')">🇮🇹</button>
-<button type="button" id="lang-en" onclick="setLang('en')">🇬🇧</button>
+<button type="button" id="lang-it" onclick="setLang('it')">🇮🇹<span>ITALIANO</span></button>
+<button type="button" id="lang-en" onclick="setLang('en')">🇬🇧<span>ENGLISH</span></button>
 </div>
 
 <header>
